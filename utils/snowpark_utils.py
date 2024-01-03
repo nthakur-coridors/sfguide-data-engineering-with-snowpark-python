@@ -23,12 +23,16 @@ def get_snowpark_session() -> Session:
     # if running locally with a config file
     # TODO: Look for a creds.json style file. This should be the way all snowpark
     # related tools work IMO
+    #     .devcontainer/config
+    # /workspaces/sfguide-data-engineering-with-snowpark-python/.devcontainer/config
     # if using snowsql config, like snowcli does
-    elif os.path.exists(os.path.expanduser('~/.snowsql/config')):
+    elif os.path.exists(os.path.expanduser('/workspaces/sfguide-data-engineering-with-snowpark-python/.devcontainer/config')):
         snowpark_config = get_snowsql_config()
         SnowflakeConnection().connection = Session.builder.configs(snowpark_config).create()
     # otherwise configure from environment variables
     elif "SNOWSQL_ACCOUNT" in os.environ:
+        print("get_snowpark_session")
+        print("last elif")
         snowpark_config = {
             "account": os.environ["SNOWSQL_ACCOUNT"],
             "user": os.environ["SNOWSQL_USER"],

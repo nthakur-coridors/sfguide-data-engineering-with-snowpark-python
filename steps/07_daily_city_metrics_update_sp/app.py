@@ -47,7 +47,8 @@ def merge_daily_city_metrics(session):
                                         .with_column("DAILY_SALES", F.call_builtin("ZEROIFNULL", F.col("price_nulls"))) \
                                         .select(F.col('ORDER_TS_DATE').alias("DATE"), F.col("PRIMARY_CITY").alias("CITY_NAME"), \
                                         F.col("COUNTRY").alias("COUNTRY_DESC"), F.col("DAILY_SALES"))
-#    orders.limit(5).show()
+    orders.limit(5).show()
+
 
     weather_pc = session.table("FROSTBYTE_WEATHERSOURCE.ONPOINT_ID.POSTAL_CODES")
     countries = session.table("RAW_POS.COUNTRY")
@@ -71,7 +72,7 @@ def merge_daily_city_metrics(session):
                             F.round(F.col("AVG_PRECIPITATION_MM"), 2).alias("AVG_PRECIPITATION_MILLIMETERS"), \
                             F.col("MAX_WIND_SPEED_100M_MPH")
                             )
-#    weather_agg.limit(5).show()
+    weather_agg.limit(5).show()
 
     daily_city_metrics_stg = orders.join(weather_agg, (orders['DATE'] == weather_agg['DATE']) & (orders['CITY_NAME'] == weather_agg['CITY_NAME']) & (orders['COUNTRY_DESC'] == weather_agg['COUNTRY_DESC']), \
                         how='left', rsuffix='_w') \
@@ -79,7 +80,7 @@ def merge_daily_city_metrics(session):
                         "AVG_TEMPERATURE_FAHRENHEIT", "AVG_TEMPERATURE_CELSIUS", \
                         "AVG_PRECIPITATION_INCHES", "AVG_PRECIPITATION_MILLIMETERS", \
                         "MAX_WIND_SPEED_100M_MPH")
-#    daily_city_metrics_stg.limit(5).show()
+    daily_city_metrics_stg.limit(5).show()
 
     cols_to_update = {c: daily_city_metrics_stg[c] for c in daily_city_metrics_stg.schema.names}
     metadata_col_to_update = {"META_UPDATED_AT": F.current_timestamp()}
@@ -95,9 +96,9 @@ def main(session: Session) -> str:
     # Create the DAILY_CITY_METRICS table if it doesn't exist
     if not table_exists(session, schema='ANALYTICS', name='DAILY_CITY_METRICS'):
         create_daily_city_metrics_table(session)
-    
+     
     merge_daily_city_metrics(session)
-#    session.table('ANALYTICS.DAILY_CITY_METRICS').limit(5).show()
+    session.table('ANALYTICS.DAILY_CITY_METRICS').limit(5).show()
 
     return f"Successfully processed DAILY_CITY_METRICS"
 
